@@ -1,0 +1,45 @@
+<p>editor works!</p>
+
+<div class="editor">
+
+  <h2>Configuration Editor</h2>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+
+    <label>Configuration JSON</label>
+
+    <textarea
+      formControlName="data" placeholder="Enter configuration JSON">
+    </textarea>
+
+    @if (form.controls.data.touched && form.controls.data.invalid) {
+      <p class="error">
+        Configuration JSON is required.
+      </p>
+    }
+
+    <label>Created By</label>
+
+    <input
+      type="text"
+      formControlName="createdBy"
+      placeholder="Enter your name" />
+
+    @if (form.controls.createdBy.touched &&
+         form.controls.createdBy.invalid) {
+      <p class="error">
+        Created By is required.
+      </p>
+    }
+
+    <button type="submit">
+      Save Configuration
+    </button>
+
+  </form>
+
+  @if (message) {
+    <p>{{ message }}</p>
+  }
+
+</div>

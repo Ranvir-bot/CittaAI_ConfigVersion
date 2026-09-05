@@ -1,0 +1,52 @@
+.editor {
+  max-width: 900px;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+input {
+  width: 300px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+button {
+  display: block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+textarea {
+  width: 100%;
+  min-height: 15px;
+  max-height: 600px;
+  overflow-y: auto;
+  resize: vertical;
+  box-sizing: border-box;
+
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+
+  font-family: monospace;
+  font-size: 14px;
+}
+input { width: 300px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; background: white; }

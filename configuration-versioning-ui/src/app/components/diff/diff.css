@@ -1,0 +1,116 @@
+.diff {
+  max-width: 1000px;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+select {
+  width: 500px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.btn-compare {
+  display: block;
+  margin-top: 20px;
+  padding: 8px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+}
+
+.btn-compare:hover {
+  background: #f0f0f0;
+}
+
+
+/* Diff Result */
+
+.result {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.result h3 {
+  margin-top: 0;
+}
+
+
+/* Individual change */
+
+.diff-item {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+
+/* Type */
+
+.diff-type {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+
+/* Path */
+
+.diff-path {
+  margin-bottom: 8px;
+}
+
+
+/* Value */
+
+.diff-value {
+  margin-top: 5px;
+}
+
+
+/* Added */
+
+.diff-item:has(.diff-type:first-child) {
+}
+
+
+/* Added */
+
+.diff-item:has(.diff-type) {
+}
+
+.diff-item.added {
+  border-left: 5px solid green;
+  background: #f0fff0;
+}
+
+.diff-item.modified {
+  border-left: 5px solid orange;
+  background: #fffaf0;
+}
+
+.diff-item.removed {
+  border-left: 5px solid red;
+  background: #fff0f0;
+}
+
+.diff-item.added .diff-type {
+  color: green;
+}
+
+.diff-item.modified .diff-type {
+  color: orange;
+}
+
+.diff-item.removed .diff-type {
+  color: red;
+}

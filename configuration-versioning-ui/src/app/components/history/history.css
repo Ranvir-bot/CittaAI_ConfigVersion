@@ -1,0 +1,24 @@
+.history { max-width: 1000px; }
+
+table { width: 100%; border-collapse: collapse; }
+
+th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+
+th { font-weight: bold; }
+
+
+.version-detail { margin-top: 25px; padding: 20px; border: 1px solid #ccc; border-radius: 6px; background: #fafafa; }
+
+.version-detail h3 { margin-top: 0; }
+
+.version-detail p { margin: 8px 0; }
+
+.version-detail pre { padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: white; white-space: pre-wrap; font-family: monospace; }
+
+.btn-view { padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; background: white; cursor: pointer; }
+
+.btn-view:hover { background: #f0f0f0; }
+
+.btn-back { padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; background: white; cursor: pointer; }
+
+.btn-back:hover { background: #f0f0f0; }
