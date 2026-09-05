@@ -50,3 +50,14 @@ textarea {
   font-size: 14px;
 }
 input { width: 300px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; background: white; }
+
+button {
+  background-color: #ccc;
+  color: white;
+  cursor: not-allowed;
+}
+
+button:not(:disabled) {
+  background-color: green;
+  cursor: pointer;
+}

@@ -4,7 +4,7 @@ namespace ConfigurationVersioning.Api.Services
 {
     public interface IConfigurationService
     {
-        Task<ConfigurationVersionDto> CreateVersionAsync(SaveConfigurationRequest request);
+        Task<SaveConfigurationResponse> CreateVersionAsync(SaveConfigurationRequest request);
 
         Task<List<ConfigurationVersionDto>> GetVersionsAsync();
 

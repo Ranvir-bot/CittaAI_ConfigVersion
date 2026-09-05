@@ -1,5 +1,5 @@
-import { Component, inject ,signal } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { AsyncPipe, JsonPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Config } from '../../services/config';
@@ -10,7 +10,7 @@ import { DiffItem } from '../../models/diff-item.model';
 
 @Component({
   selector: 'app-diff',
-  imports: [ReactiveFormsModule, AsyncPipe],
+  imports: [ReactiveFormsModule, AsyncPipe, JsonPipe],
   templateUrl: './diff.html',
   styleUrl: './diff.css'
 })
@@ -19,18 +19,19 @@ export class Diff {
   private readonly configService = inject(Config);
   private readonly diffService = inject(DiffService);
   private readonly fb = inject(FormBuilder);
+  showResult = signal(false);
 
   versions$ = this.configService.getVersions();
 
-  //diffItems: DiffItem[] = [];
-diffItems = signal<DiffItem[]>([]);
+  diffItems = signal<DiffItem[]>([]);
   form = this.fb.group({
     from: ['', Validators.required],
     to: ['', Validators.required]
   });
 
   compare(): void {
-
+//    this.showResult = false;
+    this.showResult.set(false);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -42,10 +43,9 @@ diffItems = signal<DiffItem[]>([]);
     this.configService.getVersionById(from)
       .subscribe({
         next: (fromVersion: Version) => {
-
           this.configService.getVersionById(to)
             .subscribe({
-               next: (toVersion: Version) => {
+              next: (toVersion: Version) => {
 
                 const items = this.diffService.getDiffItems(
                   fromVersion.configurationJson,
@@ -53,17 +53,14 @@ diffItems = signal<DiffItem[]>([]);
                 );
 
                 this.diffItems.set(items);
-
+                this.showResult.set(true);
                 console.log('Diff Items:', this.diffItems());
               },
-
               error: (error) => {
                 console.error('To version error:', error);
               }
             });
-
         },
-
         error: (error) => {
           console.error('From version error:', error);
         }

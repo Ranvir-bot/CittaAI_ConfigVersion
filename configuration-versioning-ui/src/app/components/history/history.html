@@ -1,7 +1,5 @@
 <div class="history">
 
-    @if (!selectedVersion) {
-
     <h2>Version History</h2>
 
     <table>
@@ -22,56 +20,28 @@
 
             @for (version of (versions$ | async); track version.id) {
 
-            <tr>
-                <td>{{ version.id }}</td>
-                <td>{{ version.configurationId }}</td>
-                <td>{{ version.versionNumber }}</td>
-                <td>{{version.configurationJson}}</td>
-                <td>{{ version.author }}</td>
-                <td>{{ version.createdAt | date:'medium' }}</td>
+                <tr>
+                    <td>{{ version.id }}</td>
 
-                <td>
-                    <button class="btn-view" (click)="view(version.id)">View</button>
-                </td>
-            </tr>
+                    <td>{{ version.configurationId }}</td>
+
+                    <td>{{ version.versionNumber }}</td>
+
+                    <td>{{ version.configurationJson }}</td>
+
+                    <td>{{ version.author }}</td>
+
+                    <td>{{ version.createdAt | date:'medium' }}</td>
+
+                    <td>
+                        <button class="btn-view" (click)="edit(version.id)">Edit</button>
+                    </td>
+                </tr>
 
             }
 
         </tbody>
 
     </table>
-
-    } @else {
-
-    <div class="version-detail">
-
-<button class="btn-back" (click)="back()">← Back</button>
-
-        <h2>Version {{ selectedVersion.versionNumber }}</h2>
-
-        <p>ID: {{ selectedVersion.id }}</p>
-
-        <p>
-            Configuration ID:
-            {{ selectedVersion.configurationId }}
-        </p>
-
-        <p>
-            Created By:
-            {{ selectedVersion.author }}
-        </p>
-
-        <p>
-            Created At:
-            {{ selectedVersion.createdAt | date:'medium' }}
-        </p>
-
-        <h3>Configuration JSON</h3>
-
-        <pre>{{ selectedVersion.configurationJson }}</pre>
-
-    </div>
-
-    }
 
 </div>

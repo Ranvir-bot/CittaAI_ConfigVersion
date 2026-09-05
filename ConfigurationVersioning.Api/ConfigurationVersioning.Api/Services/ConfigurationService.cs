@@ -1,25 +1,46 @@
-﻿using ConfigurationVersioning.Api.Data;
-using ConfigurationVersioning.Api.DTOs;
+﻿using ConfigurationVersioning.Api.DTOs;
 using ConfigurationVersioning.Api.Models;
-using Microsoft.EntityFrameworkCore;
+using ConfigurationVersioning.Api.Repositories;
+using Newtonsoft.Json.Linq;
 
 namespace ConfigurationVersioning.Api.Services
 {
     public class ConfigurationService : IConfigurationService
     {
-        private readonly AppDbContext _context;
-        public ConfigurationService(AppDbContext context)
+        private readonly IConfigurationRepository _repository;
+
+        public ConfigurationService(IConfigurationRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
-        public async Task<ConfigurationVersionDto> CreateVersionAsync(SaveConfigurationRequest request)
+        public async Task<SaveConfigurationResponse> CreateVersionAsync(SaveConfigurationRequest request)
         {
-            // 1. Check whether configuration exists
-            var configuration = request.ConfigurationId.HasValue ? await _context.Configurations
-                    .FirstOrDefaultAsync(x => x.Id == request.ConfigurationId.Value) : null;
+            try
+            {
+                JToken.Parse(request.Data);
+            }
+            catch
+            {
+                return new SaveConfigurationResponse
+                {
+                    Success = false,
+                    Message = "Invalid JSON configuration."
+                };
+            }
 
-            // 2. Create new configuration if it does not exist
+            var configuration = request.ConfigurationId.HasValue ? await _repository.GetConfigurationByIdAsync(request.ConfigurationId.Value)
+                : null;
+
+            if (request.ConfigurationId.HasValue && configuration == null)
+            {
+                return new SaveConfigurationResponse
+                {
+                    Success = false,
+                    Message = $"Configuration {request.ConfigurationId.Value} not found."
+                };
+            }
+
             if (configuration == null)
             {
                 configuration = new Configuration
@@ -28,75 +49,70 @@ namespace ConfigurationVersioning.Api.Services
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
-
-                _context.Configurations.Add(configuration);
-
-                await _context.SaveChangesAsync();
             }
 
-            // 3. Find the latest version
-            var lastVersion = await _context.ConfigurationVersions
-                .Where(x => x.ConfigurationId == configuration.Id).OrderByDescending(x => x.VersionNumber)
-                .FirstOrDefaultAsync();
+            var lastVersion = await _repository.GetLatestVersionAsync(configuration.Id);
+            if (request.BaseVersionId.HasValue && lastVersion != null && request.BaseVersionId.Value != lastVersion.Id)
+            {
+                return new SaveConfigurationResponse
+                {
+                    Success = false,
+                    Message = "This version is stale. A newer version already exists."
+                };
+            }
 
-            // 4. Calculate next version number
             var newVersionNumber = lastVersion == null ? 1 : lastVersion.VersionNumber + 1;
 
-            // 5. Create new version
             var newConfigurationVersion = new ConfigurationVersion
             {
                 ConfigurationId = configuration.Id,
                 VersionNumber = newVersionNumber,
                 ConfigurationJson = request.Data,
                 Author = request.CreatedBy,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                PreviousVersionId = lastVersion?.Id
             };
 
-            _context.ConfigurationVersions.Add(newConfigurationVersion);
+            await _repository.SaveVersionAsync(configuration, newConfigurationVersion);
 
-            await _context.SaveChangesAsync();
-
-            // 6. Update current version
-            configuration.CurrentVersionId =
-                newConfigurationVersion.Id;
-
-            configuration.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            // 7. Return DTO
-            return new ConfigurationVersionDto
+            return new SaveConfigurationResponse
             {
-                Id = newConfigurationVersion.Id,
-                ConfigurationId = newConfigurationVersion.ConfigurationId,
-                VersionNumber = newConfigurationVersion.VersionNumber,
-                ConfigurationJson = newConfigurationVersion.ConfigurationJson,
-                CreatedAt = newConfigurationVersion.CreatedAt,
-                Author = newConfigurationVersion.Author,
-                Comment = newConfigurationVersion.Comment,
-                PreviousVersionId = newConfigurationVersion.PreviousVersionId
+                Success = true,
+                Message = $"Version {newConfigurationVersion.VersionNumber} saved successfully.",
+                Version = new ConfigurationVersionDto
+                {
+                    Id = newConfigurationVersion.Id,
+                    ConfigurationId = newConfigurationVersion.ConfigurationId,
+                    VersionNumber = newConfigurationVersion.VersionNumber,
+                    ConfigurationJson = newConfigurationVersion.ConfigurationJson,
+                    CreatedAt = newConfigurationVersion.CreatedAt,
+                    Author = newConfigurationVersion.Author,
+                    Comment = newConfigurationVersion.Comment,
+                    PreviousVersionId = newConfigurationVersion.PreviousVersionId
+                }
             };
         }
 
         public async Task<List<ConfigurationVersionDto>> GetVersionsAsync()
         {
-            return await _context.ConfigurationVersions.OrderBy(x => x.ConfigurationId).ThenBy(x => x.VersionNumber)
-                .Select(x => new ConfigurationVersionDto
-                {
-                    Id = x.Id,
-                    ConfigurationId = x.ConfigurationId,
-                    VersionNumber = x.VersionNumber,
-                    ConfigurationJson = x.ConfigurationJson,
-                    CreatedAt = x.CreatedAt,
-                    Author = x.Author,
-                    Comment = x.Comment,
-                    PreviousVersionId = x.PreviousVersionId
-                }).ToListAsync();
+            var versions = await _repository.GetVersionsAsync();
+
+            return versions.Select(x => new ConfigurationVersionDto
+            {
+                Id = x.Id,
+                ConfigurationId = x.ConfigurationId,
+                VersionNumber = x.VersionNumber,
+                ConfigurationJson = x.ConfigurationJson,
+                CreatedAt = x.CreatedAt,
+                Author = x.Author,
+                Comment = x.Comment,
+                PreviousVersionId = x.PreviousVersionId
+            }).ToList();
         }
 
         public async Task<ConfigurationVersionDto?> GetVersionByIdAsync(int versionId)
         {
-            var version = await _context.ConfigurationVersions.FirstOrDefaultAsync(x => x.Id == versionId);
+            var version = await _repository.GetVersionByIdAsync(versionId);
 
             if (version == null)
             {
@@ -118,11 +134,9 @@ namespace ConfigurationVersioning.Api.Services
 
         public async Task<string?> GetVersionJsonByIdAsync(int versionId)
         {
-            var version = await _context.ConfigurationVersions.FirstOrDefaultAsync(x => x.Id == versionId);
+            var version = await _repository.GetVersionByIdAsync(versionId);
 
             return version?.ConfigurationJson;
         }
-
-
     }
 }

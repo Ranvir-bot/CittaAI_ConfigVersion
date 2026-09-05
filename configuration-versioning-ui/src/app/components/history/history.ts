@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { DatePipe,AsyncPipe } from '@angular/common';
+import { Router } from '@angular/router';
 
 import { Config } from '../../services/config';
 import { Version } from '../../models/version.model';
@@ -13,29 +14,18 @@ import { Version } from '../../models/version.model';
 export class History {
 
   private readonly configService = inject(Config);
+  private readonly router = inject(Router);
 
   versions: Version[] = [];
-  selectedVersion?: Version;
 
   versions$ = this.configService.getVersions();
 
-  view(id: number): void {
-    this.configService.getVersionById(id)
-      .subscribe({
-        next: (response: Version) => {
-          console.log('Selected version:', response);
-
-          this.selectedVersion = response;
-        },
-
-        error: (error) => {
-          console.error('Error:', error);
-        }
-      });
+ edit(id: number): void {
+    this.router.navigate(['/'], {
+      queryParams: { versionId: id }
+    });
   }
 
- back(): void {
-    this.selectedVersion = undefined;
-  }
+
 
 }

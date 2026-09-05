@@ -1,12 +1,16 @@
 using ConfigurationVersioning.Api.Data;
 using ConfigurationVersioning.Api.Diff;
+using ConfigurationVersioning.Api.Repositories;
 using ConfigurationVersioning.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddControllers().AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -16,6 +20,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 builder.Services.AddScoped<IJsonDiffService, JsonDiffService>();
+builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularPolicy", policy =>

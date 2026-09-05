@@ -1,35 +1,26 @@
+<!-- <p>Show Result: {{ showResult }}</p>
+<p>Items: {{ diffItems().length }}</p> -->
 <div class="diff">
-
   <h2>Compare Versions</h2>
-
   <form [formGroup]="form" (ngSubmit)="compare()">
-
     <label>From Version</label>
-
     <select formControlName="from">
       <option value="">Select version</option>
-
       @for (version of (versions$ | async); track version.id) {
-        <option [value]="version.id">
-          Configuration {{ version.configurationId }}
-          - Version {{ version.versionNumber }}
-          (ID: {{ version.id }})
-        </option>
+      <option [value]="version.id">
+        Configuration {{ version.configurationId }}
+        - Version {{ version.versionNumber }}
+        (ID: {{ version.id }})
+      </option>
       }
     </select>
 
-
     <label>To Version</label>
-
     <select formControlName="to">
       <option value="">Select version</option>
-
       @for (version of (versions$ | async); track version.id) {
-        <option [value]="version.id">
-          Configuration {{ version.configurationId }}
-          - Version {{ version.versionNumber }}
-          (ID: {{ version.id }})
-        </option>
+      <option [value]="version.id">Configuration {{ version.configurationId }}- Version {{ version.versionNumber }}
+        (ID: {{ version.id }})</option>
       }
     </select>
 
@@ -37,64 +28,42 @@
     <button class="btn-compare" type="submit">
       Compare
     </button>
-
   </form>
 
-<div class="result">
+  @if (showResult()) {
+  <div class="result">
+    <h3>Diff Result</h3>
+    <p>Total Changes: {{ diffItems().length }}</p>
+    @for (item of diffItems(); track $index) {
+    <div class="diff-item" [class.added]="item.type === 'Added'" [class.modified]="item.type === 'Modified'"
+      [class.removed]="item.type === 'Removed'">
+      <div class="diff-type">{{ item.type }}</div>
 
-  <h3>Diff Result</h3>
+      <div class="diff-path"><strong>Path:</strong> {{ item.path }}</div>
+      @if (item.type === 'Modified') {
+      <div class="diff-value">
+        <strong>Old value:</strong> {{ item.oldValue !== undefined ? (item.oldValue | json) : '-' }}
+      </div>
 
-  <p>Total Changes: {{ diffItems().length }}</p>
+      <div class="diff-value">
+        <strong>New Value:</strong> {{ item.newValue !== undefined ? (item.newValue | json) : '-' }}
+      </div>
+      }
 
-  @for (item of diffItems(); track $index) {
+      @if (item.type === 'Added') {
+      <div class="diff-value">
+        <strong>New Value:</strong> {{ item.newValue !== undefined ? (item.newValue | json) : '-' }}
+      </div>
+      }
 
-  <div
-    class="diff-item"
-    [class.added]="item.type === 'Added'"
-    [class.modified]="item.type === 'Modified'"
-    [class.removed]="item.type === 'Removed'">
-
-    <div class="diff-type">
-      {{ item.type }}
+      @if (item.type === 'Removed') {
+      <div class="diff-value">
+        <strong>Old Value:</strong> {{ item.oldValue !== undefined ? (item.oldValue | json) : '-' }}
+      </div>
+      }
     </div>
-
-    <div class="diff-path">
-      <strong>Path:</strong> {{ item.path }}
-    </div>
-
-    @if (item.type === 'Modified') {
-
-      <div class="diff-value">
-        <strong>Old value:</strong> {{ item.oldValue  ?? '-' }}
-      </div>
-
-      <div class="diff-value">
-        <strong>New Value:</strong> {{ item.newValue  ?? '-'}}
-      </div>
-
     }
-
-    @if (item.type === 'Added') {
-
-      <div class="diff-value">
-        <strong>New Value:</strong> {{ item.newValue  ?? '-' }}
-      </div>
-
-    }
-
-    @if (item.type === 'Removed') {
-
-      <div class="diff-value">
-        <strong>Old Value:</strong> {{ item.oldValue  ?? '-' }}
-      </div>
-
-    }
-
   </div>
-
-}
-
-</div>
-
+  }
 
 </div>

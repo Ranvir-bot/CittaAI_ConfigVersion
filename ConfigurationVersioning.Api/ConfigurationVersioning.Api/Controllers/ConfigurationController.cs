@@ -25,7 +25,19 @@ namespace ConfigurationVersioning.Api.Controllers
         public async Task<IActionResult> Save(SaveConfigurationRequest request)
         {
             var response =await _configurationService.CreateVersionAsync(request);
+            if (!response.Success)
+            {
+                if (response.Message.Contains("not found"))
+                {
+                    return NotFound(response);
+                }
+                if (response.Message.Contains("stale"))
+                {
+                    return Conflict(response);
+                }
 
+                return BadRequest(response);
+            }
             return Ok(response);
         }
 
@@ -54,7 +66,11 @@ namespace ConfigurationVersioning.Api.Controllers
         [HttpGet("diff")]
         public async Task<IActionResult> GetDiff([FromQuery] int from, [FromQuery] int to)
         {
-            // 1. Get "from" version JSON
+            if (from == to)
+            {
+                return BadRequest("From and To versions must be different.");
+            }
+
             var fromJson = await _configurationService.GetVersionJsonByIdAsync(from);
 
             if (fromJson == null)
@@ -62,7 +78,6 @@ namespace ConfigurationVersioning.Api.Controllers
                 return NotFound($"Version {from} not found.");
             }
 
-            // 2. Get "to" version JSON
             var toJson = await _configurationService.GetVersionJsonByIdAsync(to);
 
             if (toJson == null)
@@ -70,10 +85,8 @@ namespace ConfigurationVersioning.Api.Controllers
                 return NotFound($"Version {to} not found.");
             }
 
-            // 3. Compare the two JSON configurations
             var diff = _jsonDiffService.Compare(fromJson, toJson);
 
-            // 4. Return the diff
             return Ok(diff);
         }
 

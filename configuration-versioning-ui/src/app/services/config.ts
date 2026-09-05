@@ -4,6 +4,10 @@ import { Observable } from 'rxjs';
 
 import { Save } from '../models/save.model';
 import { Version } from '../models/version.model';
+import { API_CONFIG } from '../config/api.config';
+import { SaveResponse } from '../models/save-response.model';
+
+
 
 @Injectable({
     providedIn: 'root'
@@ -11,16 +15,14 @@ import { Version } from '../models/version.model';
 export class Config {
 
     private readonly http = inject(HttpClient);
+    private readonly apiUrl = `${API_CONFIG.baseUrl}/config`;
 
-    private readonly apiUrl = 'https://localhost:7200/config';
-
-    saveConfiguration(request: Save): Observable<Version> {
+    saveConfiguration(request: Save): Observable<SaveResponse> {
         debugger;
-        return this.http.post<Version>(`${this.apiUrl}/save`, request);
+        return this.http.post<SaveResponse>(`${this.apiUrl}/save`, request);
     }
 
     getVersions(): Observable<Version[]> {
-        debugger;
         return this.http.get<Version[]>(`${this.apiUrl}/versions`);
     }
 
