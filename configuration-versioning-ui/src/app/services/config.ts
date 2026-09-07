@@ -18,7 +18,6 @@ export class Config {
     private readonly apiUrl = `${API_CONFIG.baseUrl}/config`;
 
     saveConfiguration(request: Save): Observable<SaveResponse> {
-        debugger;
         return this.http.post<SaveResponse>(`${this.apiUrl}/save`, request);
     }
 
